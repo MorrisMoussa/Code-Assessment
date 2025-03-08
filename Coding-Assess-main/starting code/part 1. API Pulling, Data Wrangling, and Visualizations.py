@@ -6,13 +6,11 @@ Created on Fri Mar  7 16:33:20 2025
 """
 import pandas as pd 
 import numpy as np 
+from fredapi import Fred
 import os
 import warnings
-wd = os.getcwd()
-data_directory = str(wd) + "\\Coding-Assess-main\\data\\"
-input_file = "Part 1. bonds_yields.xlsx"
-df_bonds = pd.read_excel(data_directory + input_file)
-
+import matplotlib.pyplot as plt
+from datetime import datetime
 warnings.filterwarnings('ignore')
 
 def fetch_fred_yield(series_id, start_date, end_date, api_key):
@@ -23,9 +21,11 @@ def fetch_fred_yield(series_id, start_date, end_date, api_key):
     
     return df  
 
-#current directory
-.
-
+### inputs:
+wd = os.getcwd()
+data_directory = str(wd) + "\\Coding-Assess-main\\data\\"
+input_file = "Part 1. bonds_yields.xlsx"
+df_bonds = pd.read_excel(data_directory + input_file)
 #my API key
 my_api_key = "60af7aa584e88ed55ad85bad09c2c9d7"
 # Initialize API key
@@ -41,7 +41,7 @@ tenor_series_ids = [
     "DGS7", "DGS10", "DGS20", "DGS30"     # Long-term yields
 ]
 
-
+#store treasury hisotrical data in a dataframe
 for i in range(len(tenor_series_ids)):
     if i == 0:
         df_treasury = fetch_fred_yield(tenor_series_ids[i], start_date, end_date, my_api_key)
@@ -58,6 +58,7 @@ df_treasury = df_treasury.rename(columns={   "DGS1" : 1,
 tenors_years = [1,2,3,5,7,10,20,30]
 
 
+#spread calculations
 df_bonds["spread"] = ''
 k = 0 
 for _, bond in df_bonds.iterrows():
@@ -80,19 +81,19 @@ for _, bond in df_bonds.iterrows():
     else:
         yieldd = round(float(treasury_curve[wal]),4)
     df_bonds.iloc[k,4] = bond_yield - yieldd
-    print(k)
     k = k+1
 
+# Visualization: Spread Distribution:
+plt.figure(figsize=(12, 6))
+df_bonds.groupby('Sector')['spread'].mean().sort_values().plot(kind='bar')
+plt.ylabel('Average Spread (bps)')
+plt.title('Sector-Level Relative Value Analysis')
+plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better visibility
+plt.show()
 
-
-
-
-
-
-
-
-
-
-
-
-
+df_bonds.boxplot(column='spread', by='Sector', vert=False, grid=False)
+plt.xlabel('Spread (bps)')
+plt.ylabel('Sector')
+plt.title('Spread Distribution by Sector')
+plt.suptitle('')  # Remove default Pandas title
+plt.show()
