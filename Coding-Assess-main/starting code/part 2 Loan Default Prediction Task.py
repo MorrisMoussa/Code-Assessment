@@ -22,25 +22,25 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 
 ### Documentation of Approach
 documentation = """ 
-     Objectivce: Build a machine learning model to predict loan defaults using the provided datase
-    
+     Objective: Build a machine learning model to predict loan defaults using the provided dataset
+     
      Since this machine learning model is predicting a binary outcome: default vs not default, 
-     a classifier and/or logitic regression model is approriate for this situation 
+     a classifier and/or logistic regression model is appropriate for this situation 
     
      1. Loan in the data, and account for any missing values.
     
-     2. Feature Engineering: there are multiple addtional features that could be calculated 
-     from the oringal dataset which might have significant predictive power. For example, their credit
-    utilization will one would assume gives insight into potential financial strain (and hence default probabilty
-    on their loan). Additonally, debt_to_income_ratio is another feature that can be calculated based
-    on the orignal set of features that also gives an indication of a borrower's  capacity to pay their
-    periodic debt payment given their periodic income.  
+     2. Feature Engineering: there are multiple additional features that could be calculated 
+    from the original dataset which might have significant predictive power. For example, their credit
+    utilization one would assume gives insight into potential financial strain (and hence default probability
+    on their loan). Additionally, debt to income ratio is another feature that can be calculated based
+    on the original  set of features that also gives an indication of a borrower's capacity/capability 
+    to pay their periodic debt payment given their periodic income.  
     
-     Based on the orginal feature set, and the additonal features created, run a classifier algorithm (ranndom forest)
-    and rank feature importance/predictive power. To limit overfitting and keeping the model rebust, we can
+    Based on the original feature set, and the additional features created, run a classifier algorithm (random forest)
+    and rank feature importance/predictive power. To limit overfitting and keeping the model robust, we can
     keep the top 10 most important features to train our final model. 
     
-    3. Model Training: Seperate our top 10 features (X) and our target variable (Y). The Features are
+    3. Model Training: Separate our top 10 features (X) and our target variable (Y). The Features are
     standardized so they are on the same order of magnitude/scale. Split data into training data (80%) 
     set to train the model and test data (20%) set.
     
@@ -48,20 +48,19 @@ documentation = """
     Using the model that was trained using the training set, the test data set was used to make predictions. 
     These predictions were then compared to the actual outcomes of the test set by creating a Confusion 
     Matrix that shows True Positives, True Negatives, False Positives, False Negatives. These can be 
-    used to calculate Precision (Positive Predictive Value)
-    , Recall (Sensitivity / True Positive Rate)
-    , F1-Score (Harmonic Mean of Precision & Recall)
+    used to calculate Precision (Positive Predictive Value),
+    Recall (Sensitivity / True Positive Rate),
+    F1-Score (Harmonic Mean of Precision & Recall)
     and Accuracy (over all correctness of the mode). 
     
-    Since we are trying to predict probabilty of loan default, having false
-    negatives is more detramental. Therefore, having a higher Recall 
+    Since we are trying to predict probability  of loan default, having false
+    negatives is more detrimental. Therefore, having a higher Recall 
     is more valuable from a model. While Accuracy is a more overall measure
-    and therefore also important. 
+    and therefore, also important. 
     
-    Givent these facts, the Recall and Accuracy of the Random Forest was 
-    higher, and hence is likeliy the better model to predect loan 
-    default. 
-    
+    Given these facts, the Recall and Accuracy of the Random Forest was 
+    higher, and hence is likely the better model to predict loan 
+    default.
 """
 print(documentation)
 
@@ -152,6 +151,9 @@ plt.show()
 print("Top 10 features using Random Forest:")
 for i in range(10): 
     print(np.array(feature_names)[sorted_idx][i],)
+    
+print("")
+print("")
 #select top 10 features
 selected_features = np.array(feature_names)[sorted_idx][0:10]
 
@@ -186,8 +188,12 @@ print(f"Accuracy: {accuracy_score(y_test, rf_predictions):.4f}")
 print("Confusion Matrix:\n", confusion_matrix(y_test, rf_predictions))
 print("Classification Report:\n", classification_report(y_test, rf_predictions))
 
+print("")
+print("")
+print("")
 # Evaluate Logistic Regression
 print("Logistic Regression Performance:")
 print(f"Accuracy: {accuracy_score(y_test, lr_predictions):.4f}")
 print("Confusion Matrix:\n", confusion_matrix(y_test, lr_predictions))
 print("Classification Report:\n", classification_report(y_test, lr_predictions))
+#FINAL
