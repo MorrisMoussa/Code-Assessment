@@ -2,38 +2,29 @@
 """
 Created on Fri Mar  7 16:33:20 2025
 
-@author: morri
+@author: morris
 """
-
-#key:
-#60af7aa584e88ed55ad85bad09c2c9d7
-
 import pandas as pd 
 import numpy as np 
-import matplotlib.pyplot as plt
-from fredapi import Fred
-import datetime as dateime
-import plotly.express as px
-import tensorflow as tf
-import scipy as sp
-from scipy import optimize, stats
-#imprt sklearn as sp
-from sklearn import linear_model
-import statsmodels.api as sm
 import os
-
+import warnings
 wd = os.getcwd()
 data_directory = str(wd) + "\\Coding-Assess-main\\data\\"
 input_file = "Part 1. bonds_yields.xlsx"
-df_input pd.read_excel(data_directory + input_file)
+df_bonds = pd.read_excel(data_directory + input_file)
 
+warnings.filterwarnings('ignore')
 
 def fetch_fred_yield(series_id, start_date, end_date, api_key):
    
     df = pd.DataFrame(fred.get_series(series_id, observation_start=start_date, observation_end= end_date, frequency = 'd')
                       , columns= [series_id])
     df.index.name = 'date'
+    
     return df  
+
+#current directory
+.
 
 #my API key
 my_api_key = "60af7aa584e88ed55ad85bad09c2c9d7"
@@ -50,7 +41,53 @@ tenor_series_ids = [
     "DGS7", "DGS10", "DGS20", "DGS30"     # Long-term yields
 ]
 
-df1 = fetch_fred_yield(tenor_series_ids[0], start_date, end_date, my_api_key)
+
+for i in range(len(tenor_series_ids)):
+    if i == 0:
+        df_treasury = fetch_fred_yield(tenor_series_ids[i], start_date, end_date, my_api_key)
+    else:
+        df_temp = fetch_fred_yield(tenor_series_ids[i], start_date, end_date, my_api_key)
+        df_treasury = pd.merge(df_treasury, df_temp,left_index=True, right_index=True, how='left')
+
+
+df_treasury = df_treasury.rename(columns={   "DGS1" : 1,
+    "DGS2" : 2, "DGS3": 3, "DGS5":5,               
+    "DGS7":7, "DGS10":10, "DGS20":20, "DGS30":30  
+    })
+
+tenors_years = [1,2,3,5,7,10,20,30]
+
+
+df_bonds["spread"] = ''
+k = 0 
+for _, bond in df_bonds.iterrows():
+    bond_is = bond['Bond ID']
+    wal = float(bond['WAL (years)'])  
+    bond_yield = bond['Yield (%)']
+    treasury_curve = df_treasury.tail(1)
+    yieldd = 0 
+    if wal%1 != 0 or wal not in tenors_years: 
+        i = 0 
+        while tenors_years[i] < wal:
+            i = i+1
+        low = tenors_years[i-1]
+        low_yield = float(treasury_curve[low])
+        high = tenors_years[i]
+        high_yield = float(treasury_curve[high])
+        yieldd = low_yield + (bond_yield-low_yield)*(high_yield - low_yield)/(high - low)
+        yieldd = round(yieldd,4)
+    
+    else:
+        yieldd = round(float(treasury_curve[wal]),4)
+    df_bonds.iloc[k,4] = bond_yield - yieldd
+    print(k)
+    k = k+1
+
+
+
+
+
+
 
 
 
