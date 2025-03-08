@@ -8,13 +8,11 @@ import pandas as pd
 import numpy as np 
 from fredapi import Fred
 import os
-# import tensorflow as tf
-# import scipy as sp
-# from scipy import optimize, stats
-# from sklearn import linear_model
-# import statsmodels.api as sm
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+import matplotlib.pyplot as plt
+from sklearn.inspection import permutation_importance
 
 #load data 
 wd = os.getcwd()
@@ -76,9 +74,49 @@ df['adjusted_risk_score'] = df['borrower_risk_score'] / (df['regional_unemployme
 df.drop(columns=['loan_percent_income', 'credit_score', 'borrower_risk_score'], inplace=True)
 
 # Standardize numerical features
-scaler = StandardScaler()
-numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns
-df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
+# scaler = StandardScaler()
+# numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns
+# df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
 
-# Display transformed data
-print(df.head())
+
+
+# Train a Random Forest model to assess feature importance
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_model.fit(df.drop(columns=['loan_status']), df['loan_status'])
+
+# Get feature importances
+feature_importances = rf_model.feature_importances_
+feature_names = df.drop(columns=['loan_status']).columns
+
+# Sort feature importances in descending order
+sorted_idx = np.argsort(feature_importances)[::-1]
+
+# Plot feature importances
+plt.figure(figsize=(12, 6))
+plt.barh(np.array(feature_names)[sorted_idx], feature_importances[sorted_idx], color='blue')
+plt.xlabel("Feature Importance Score")
+plt.ylabel("Features")
+plt.title("Feature Importance using Random Forest")
+plt.gca().invert_yaxis()
+plt.show()
+
+
+print("Top 10 features using Random Forest:")
+for i in range(10): 
+    print(np.array(feature_names)[sorted_idx][i],)
+
+
+# Compute permutation importance
+perm_importance = permutation_importance(rf_model, df.drop(columns=['loan_status']), df['loan_status'], scoring='accuracy', n_repeats=10, random_state=42)
+
+# Sort feature importance
+sorted_idx = perm_importance.importances_mean.argsort()[::-1]
+
+# Plot permutation importance
+plt.figure(figsize=(12, 6))
+plt.barh(np.array(feature_names)[sorted_idx], perm_importance.importances_mean[sorted_idx], color='green')
+plt.xlabel("Permutation Importance Score")
+plt.ylabel("Features")
+plt.title("Permutation Feature Importance")
+plt.gca().invert_yaxis()
+plt.show()
